@@ -1,0 +1,35 @@
+{
+  "name": "wasfat-abna-alsarouji",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "أرشيف وصفات عائلة أبناء عمرو السروجي — تطبيق عائلي خاص",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext js,jsx",
+    "cap:sync": "cap sync android",
+    "cap:open": "cap open android",
+    "android:build": "vite build && cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/app": "^6.0.1",
+    "@capacitor/push-notifications": "^6.0.2",
+    "@supabase/supabase-js": "^2.45.4",
+    "idb": "^8.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/cli": "^6.1.2",
+    "@capacitor/core": "^6.1.2",
+    "@vitejs/plugin-react": "^4.3.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.35.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "vite": "^5.4.6"
+  }
+}
