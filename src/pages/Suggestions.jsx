@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createSuggestion } from '../lib/api'
 import { Alert } from '../components/ui'
+import Icon from '../components/Icon'
 
 export default function Suggestions() {
   const navigate = useNavigate()
@@ -29,13 +30,15 @@ export default function Suggestions() {
   return (
     <div className="page">
       <div className="page-header">
-        <button className="btn btn-soft btn-sm" onClick={() => navigate('/more')}>→ رجوع</button>
-        <h1>💡 الاقتراحات</h1>
+        <button className="btn btn-soft btn-sm" style={{ width: 'auto' }} onClick={() => navigate('/more')}>
+          <Icon name="back" size={18} /> رجوع
+        </button>
+        <h1 className="row" style={{ gap: 8 }}><Icon name="bulb" size={24} /> الاقتراحات</h1>
       </div>
 
       {done ? (
         <div className="stack">
-          <Alert type="success">وصل اقتراحك إلى مسؤول العائلة. شكرًا لك! 🌟</Alert>
+          <Alert type="success">وصل اقتراحك إلى مسؤول العائلة. شكرًا لك!</Alert>
           <button className="btn btn-ghost" onClick={() => setDone(false)}>إرسال اقتراح آخر</button>
           <button className="btn btn-soft" onClick={() => navigate('/')}>العودة للرئيسية</button>
         </div>
@@ -58,7 +61,7 @@ export default function Suggestions() {
             />
           </div>
           <button className="btn btn-primary" type="submit" disabled={busy}>
-            {busy ? 'جارٍ الإرسال…' : '📨 إرسال الاقتراح'}
+            {busy ? 'جارٍ الإرسال…' : <><Icon name="send" /> إرسال الاقتراح</>}
           </button>
         </form>
       )}

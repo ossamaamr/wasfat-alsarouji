@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { fetchRecipeById, approveRecipe, rejectRecipe } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import { Loading, Empty, StatusBadge, Alert } from '../components/ui'
+import Icon from '../components/Icon'
 import { formatDate, toLines } from '../lib/format'
 
 export default function RecipeDetail() {
@@ -39,9 +40,9 @@ export default function RecipeDetail() {
     return (
       <div className="page">
         <div className="page-header">
-          <button className="btn btn-soft btn-sm" onClick={() => navigate(-1)}>→ رجوع</button>
+          <button className="btn btn-soft btn-sm" style={{ width: 'auto' }} onClick={() => navigate(-1)}><Icon name="back" size={18} /> رجوع</button>
         </div>
-        <Empty emoji="🔍" title="الوصفة غير موجودة">
+        <Empty icon="search" title="الوصفة غير موجودة">
           قد تكون محذوفة أو غير متاحة دون اتصال.
         </Empty>
       </div>
@@ -84,11 +85,11 @@ export default function RecipeDetail() {
   return (
     <div className="page">
       <div className="page-header">
-        <button className="btn btn-soft btn-sm" onClick={() => navigate(-1)}>→ رجوع</button>
+        <button className="btn btn-soft btn-sm" style={{ width: 'auto' }} onClick={() => navigate(-1)}><Icon name="back" size={18} /> رجوع</button>
         <div className="grow" />
         {canEdit && (
-          <button className="btn btn-ghost btn-sm" onClick={() => navigate(`/edit/${recipe.id}`)}>
-            ✏️ تعديل
+          <button className="btn btn-ghost btn-sm" style={{ width: 'auto' }} onClick={() => navigate(`/edit/${recipe.id}`)}>
+            <Icon name="edit" size={18} /> تعديل
           </button>
         )}
       </div>
@@ -108,7 +109,9 @@ export default function RecipeDetail() {
 
       <div className="row wrap text-soft" style={{ fontSize: '0.9rem', marginBottom: 20 }}>
         {recipe.category?.name && <span className="chip">{recipe.category.name}</span>}
-        {recipe.author?.display_name && <span>👩‍🍳 {recipe.author.display_name}</span>}
+        {recipe.author?.display_name && (
+          <span className="row" style={{ gap: 5 }}><Icon name="chef" size={17} /> {recipe.author.display_name}</span>
+        )}
         {recipe.created_at && <span>· {formatDate(recipe.created_at)}</span>}
       </div>
 
@@ -118,10 +121,10 @@ export default function RecipeDetail() {
           {reviewError && <Alert type="error">{reviewError}</Alert>}
           <div className="row" style={{ gap: 8 }}>
             <button className="btn btn-accent" disabled={reviewBusy} onClick={handleApprove}>
-              ✅ اعتماد
+              <Icon name="check" /> اعتماد
             </button>
             <button className="btn btn-danger" disabled={reviewBusy} onClick={handleReject}>
-              🚫 إلغاء
+              <Icon name="ban" /> إلغاء
             </button>
           </div>
         </div>
@@ -129,7 +132,7 @@ export default function RecipeDetail() {
 
       {ingredients.length > 0 && (
         <section className="card" style={{ padding: '16px 18px', marginBottom: 16 }}>
-          <h2>🧺 المكوّنات</h2>
+          <h2 className="row" style={{ gap: 8 }}><Icon name="list" size={22} /> المكوّنات</h2>
           <ul className="ingredients-list">
             {ingredients.map((line, i) => (
               <li key={i}>{line}</li>
@@ -140,7 +143,7 @@ export default function RecipeDetail() {
 
       {steps.length > 0 && (
         <section className="card" style={{ padding: '16px 18px' }}>
-          <h2>👩‍🍳 طريقة التحضير</h2>
+          <h2 className="row" style={{ gap: 8 }}><Icon name="chef" size={22} /> طريقة التحضير</h2>
           <ol className="steps-list">
             {steps.map((line, i) => (
               <li key={i}>{line}</li>

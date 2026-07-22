@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Alert } from '../components/ui'
+import Logo from '../components/Logo'
 
 export default function Login() {
   const { signIn, isAuthenticated, needsSetup } = useAuth()
@@ -41,10 +42,10 @@ export default function Login() {
   }
 
   return (
-    <div className="center-screen" style={{ justifyContent: 'flex-start', paddingTop: '12vh' }}>
-      <div style={{ fontSize: '3.6rem' }}>🍲</div>
+    <div className="center-screen" style={{ justifyContent: 'flex-start', paddingTop: '10vh' }}>
+      <Logo size={104} />
       <div className="text-center">
-        <h1 style={{ marginBottom: 4 }}>وصفات أبناء عمرو السروجي</h1>
+        <h1 style={{ marginBottom: 4 }}>وصفات أسرة السَّروجيُّ</h1>
         <p className="text-soft">أرشيف العائلة — الدخول بالمعرّف الخاص بك</p>
       </div>
 
@@ -88,6 +89,10 @@ export default function Login() {
       <p className="text-soft text-center" style={{ maxWidth: 340, fontSize: '0.85rem' }}>
         أول مرة تدخل؟ استخدم المعرّف وكلمة المرور المؤقتة، وسنطلب منك بعدها تعيين كلمة مرور
         واسمك.
+      </p>
+
+      <p className="text-soft text-center" style={{ marginTop: 'auto', paddingTop: 24, fontSize: '0.76rem', fontWeight: 600 }}>
+        من تطوير وإدارة: <span style={{ color: 'var(--color-primary)' }}>أسامة بن عمرو السَّروجي</span>
       </p>
     </div>
   )

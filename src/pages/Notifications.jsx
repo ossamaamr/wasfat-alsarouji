@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import { fetchNotifications, markNotificationRead, markAllNotificationsRead } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import { Loading, Empty, Alert } from '../components/ui'
+import Icon from '../components/Icon'
 import { timeAgo } from '../lib/format'
 
 const TYPE_ICON = {
-  recipe_approved: '✅',
-  recipe_pending: '⏳',
-  suggestion: '💡',
-  system: '🔔',
+  recipe_approved: 'checkCircle',
+  recipe_pending: 'hourglass',
+  suggestion: 'bulb',
+  system: 'bell',
 }
 
 export default function Notifications() {
@@ -50,13 +51,13 @@ export default function Notifications() {
   return (
     <div className="page">
       <div className="page-header">
-        <h1>🔔 الإشعارات</h1>
+        <h1 className="row" style={{ gap: 8 }}><Icon name="bell" size={24} /> الإشعارات</h1>
       </div>
 
       {error && <Alert type="error">{error}</Alert>}
 
       {items.length === 0 ? (
-        <Empty emoji="🔕" title="لا إشعارات بعد">
+        <Empty icon="bell" title="لا إشعارات بعد">
           ستصلك هنا تنبيهات عند اعتماد وصفة جديدة.
         </Empty>
       ) : (
@@ -74,7 +75,7 @@ export default function Notifications() {
               }}
             >
               <div className="row" style={{ gap: 12, alignItems: 'flex-start' }}>
-                <span style={{ fontSize: '1.5rem' }}>{TYPE_ICON[n.type] || '🔔'}</span>
+                <span className="notif-icon"><Icon name={TYPE_ICON[n.type] || 'bell'} size={22} /></span>
                 <div className="grow">
                   <p style={{ margin: 0, fontWeight: 700 }}>{n.title || 'إشعار'}</p>
                   {n.body && <p className="text-soft" style={{ margin: '4px 0 0', fontSize: '0.9rem' }}>{n.body}</p>}

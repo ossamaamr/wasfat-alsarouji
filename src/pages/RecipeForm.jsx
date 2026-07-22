@@ -9,6 +9,7 @@ import {
 } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import { Alert, Loading } from '../components/ui'
+import Icon from '../components/Icon'
 
 export default function RecipeForm() {
   const { id } = useParams()
@@ -109,8 +110,12 @@ export default function RecipeForm() {
   return (
     <div className="page">
       <div className="page-header">
-        <button className="btn btn-soft btn-sm" onClick={() => navigate(-1)}>→ رجوع</button>
-        <h1>{isEdit ? '✏️ تعديل الوصفة' : '➕ وصفة جديدة'}</h1>
+        <button className="btn btn-soft btn-sm" style={{ width: 'auto' }} onClick={() => navigate(-1)}>
+          <Icon name="back" size={18} /> رجوع
+        </button>
+        <h1 className="row" style={{ gap: 8 }}>
+          <Icon name={isEdit ? 'edit' : 'plus'} size={22} /> {isEdit ? 'تعديل الوصفة' : 'وصفة جديدة'}
+        </h1>
       </div>
 
       {!isEdit && (
@@ -181,7 +186,7 @@ export default function RecipeForm() {
             />
           )}
           <label className="btn btn-soft" style={{ cursor: 'pointer' }}>
-            📷 {preview ? 'تغيير الصورة' : 'إضافة صورة'}
+            <Icon name="camera" /> {preview ? 'تغيير الصورة' : 'إضافة صورة'}
             <input type="file" accept="image/*" hidden onChange={onPickImage} />
           </label>
         </div>

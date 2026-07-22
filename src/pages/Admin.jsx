@@ -12,6 +12,7 @@ import {
 } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import { Loading, Alert, Empty, RoleBadge, Modal } from '../components/ui'
+import Icon from '../components/Icon'
 import { ROLE_LABELS, USER_STATUS_LABELS, timeAgo } from '../lib/format'
 
 // ── تبويب المستخدمين ──
@@ -59,7 +60,7 @@ function UsersTab() {
       {error && <Alert type="error">{error}</Alert>}
 
       <button className="btn btn-primary mb" onClick={() => setShowCreate(true)}>
-        ➕ إنشاء معرّف جديد
+        <Icon name="plus" /> إنشاء معرّف جديد
       </button>
 
       {created && (
@@ -196,7 +197,7 @@ function SuggestionsTab() {
 
   if (loading) return <Loading />
   if (error) return <Alert type="error">{error}</Alert>
-  if (items.length === 0) return <Empty emoji="💡" title="لا اقتراحات بعد" />
+  if (items.length === 0) return <Empty icon="bulb" title="لا اقتراحات بعد" />
 
   return (
     <div className="stack" style={{ gap: 10 }}>
@@ -204,7 +205,9 @@ function SuggestionsTab() {
         <div key={s.id} className="card" style={{ padding: 16 }}>
           <p style={{ margin: 0 }}>{s.message}</p>
           <div className="row-between text-soft mt" style={{ fontSize: '0.82rem' }}>
-            <span>👤 {s.user?.display_name || s.user?.login_id || 'غير معروف'}</span>
+            <span className="row" style={{ gap: 5 }}>
+              <Icon name="user" size={15} /> {s.user?.display_name || s.user?.login_id || 'غير معروف'}
+            </span>
             <span>{timeAgo(s.created_at)}</span>
           </div>
         </div>
@@ -268,7 +271,7 @@ function CategoriesTab() {
             <button className="btn btn-soft btn-sm" style={{ width: 'auto' }} onClick={() => remove(c.id)}>حذف</button>
           </div>
         ))}
-        {items.length === 0 && <Empty emoji="🏷️" title="لا تصنيفات بعد" />}
+        {items.length === 0 && <Empty icon="tag" title="لا تصنيفات بعد" />}
       </div>
     </div>
   )
@@ -281,14 +284,16 @@ export default function Admin() {
   return (
     <div className="page">
       <div className="page-header">
-        <button className="btn btn-soft btn-sm" onClick={() => navigate('/more')}>→ رجوع</button>
-        <h1>⚙️ لوحة الأدمن</h1>
+        <button className="btn btn-soft btn-sm" style={{ width: 'auto' }} onClick={() => navigate('/more')}>
+          <Icon name="back" size={18} /> رجوع
+        </button>
+        <h1 className="row" style={{ gap: 8 }}><Icon name="settings" size={24} /> لوحة الأدمن</h1>
       </div>
 
       <div className="chips-scroll">
-        <button className={`chip ${tab === 'users' ? 'active' : ''}`} onClick={() => setTab('users')}>👥 المستخدمون</button>
-        <button className={`chip ${tab === 'suggestions' ? 'active' : ''}`} onClick={() => setTab('suggestions')}>💡 الاقتراحات</button>
-        <button className={`chip ${tab === 'categories' ? 'active' : ''}`} onClick={() => setTab('categories')}>🏷️ التصنيفات</button>
+        <button className={`chip ${tab === 'users' ? 'active' : ''}`} onClick={() => setTab('users')}><Icon name="users" /> المستخدمون</button>
+        <button className={`chip ${tab === 'suggestions' ? 'active' : ''}`} onClick={() => setTab('suggestions')}><Icon name="bulb" /> الاقتراحات</button>
+        <button className={`chip ${tab === 'categories' ? 'active' : ''}`} onClick={() => setTab('categories')}><Icon name="tag" /> التصنيفات</button>
       </div>
 
       {tab === 'users' && <UsersTab />}

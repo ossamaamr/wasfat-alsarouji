@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { fetchApprovedRecipes, fetchCategories } from '../lib/api'
 import { Loading, Empty, Alert } from '../components/ui'
+import Icon from '../components/Icon'
+import Logo from '../components/Logo'
 
 function RecipeCard({ recipe, onClick }) {
   return (
@@ -9,7 +11,9 @@ function RecipeCard({ recipe, onClick }) {
       {recipe.image_url ? (
         <img className="thumb" src={recipe.image_url} alt={recipe.title} loading="lazy" />
       ) : (
-        <div className="thumb-placeholder">🍽️</div>
+        <div className="thumb-placeholder">
+          <Icon name="pot" strokeWidth={1.5} />
+        </div>
       )}
       <div className="body">
         <h3>{recipe.title}</h3>
@@ -17,9 +21,11 @@ function RecipeCard({ recipe, onClick }) {
           <span className="text-soft" style={{ fontSize: '0.85rem' }}>
             {recipe.category?.name || 'بدون تصنيف'}
           </span>
-          <span className="text-soft" style={{ fontSize: '0.85rem' }}>
-            {recipe.author?.display_name ? `👩‍🍳 ${recipe.author.display_name}` : ''}
-          </span>
+          {recipe.author?.display_name && (
+            <span className="text-soft row" style={{ fontSize: '0.85rem', gap: 5 }}>
+              <Icon name="chef" size={16} /> {recipe.author.display_name}
+            </span>
+          )}
         </div>
       </div>
     </div>
@@ -73,17 +79,19 @@ export default function Home() {
   return (
     <div className="page">
       <div className="page-header">
-        <h1>🍲 وصفات العائلة</h1>
+        <Logo size={34} />
+        <h1>وصفات العائلة</h1>
       </div>
 
       {offline && <Alert type="warning">وضع دون اتصال — تعرض الوصفات المحفوظة سابقًا.</Alert>}
       {error && <Alert type="error">{error}</Alert>}
 
-      <div className="field" style={{ marginBottom: 12 }}>
+      <div className="search-box">
+        <Icon name="search" size={20} />
         <input
           className="input"
           type="search"
-          placeholder="🔎 ابحث عن وصفة أو مكوّن…"
+          placeholder="ابحث عن وصفة أو مكوّن…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -91,10 +99,7 @@ export default function Home() {
 
       {categories.length > 0 && (
         <div className="chips-scroll">
-          <button
-            className={`chip ${!activeCat ? 'active' : ''}`}
-            onClick={() => setActiveCat(null)}
-          >
+          <button className={`chip ${!activeCat ? 'active' : ''}`} onClick={() => setActiveCat(null)}>
             الكل
           </button>
           {categories.map((c) => (
@@ -110,10 +115,7 @@ export default function Home() {
       )}
 
       {filtered.length === 0 ? (
-        <Empty
-          emoji="🥘"
-          title={recipes.length === 0 ? 'لا توجد وصفات بعد' : 'لا نتائج'}
-        >
+        <Empty icon="pot" title={recipes.length === 0 ? 'لا توجد وصفات بعد' : 'لا نتائج'}>
           {recipes.length === 0
             ? 'كن أول من يضيف وصفة العائلة! اضغط «إضافة» بالأسفل.'
             : 'جرّب كلمة بحث أخرى أو تصنيفًا مختلفًا.'}

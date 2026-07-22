@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { fetchPendingRecipes, approveRecipe, rejectRecipe } from '../lib/api'
 import { Loading, Empty, Alert } from '../components/ui'
+import Icon from '../components/Icon'
 import { formatDate, toLines } from '../lib/format'
 
 export default function Review() {
@@ -59,14 +60,16 @@ export default function Review() {
   return (
     <div className="page">
       <div className="page-header">
-        <button className="btn btn-soft btn-sm" onClick={() => navigate('/more')}>→ رجوع</button>
-        <h1>🕵️ المراجعة</h1>
+        <button className="btn btn-soft btn-sm" style={{ width: 'auto' }} onClick={() => navigate('/more')}>
+          <Icon name="back" size={18} /> رجوع
+        </button>
+        <h1 className="row" style={{ gap: 8 }}><Icon name="eye" size={24} /> المراجعة</h1>
       </div>
 
       {error && <Alert type="error">{error}</Alert>}
 
       {recipes.length === 0 ? (
-        <Empty emoji="✅" title="لا يوجد ما يحتاج مراجعة">
+        <Empty icon="checkCircle" title="لا يوجد ما يحتاج مراجعة">
           كل الوصفات تمّت مراجعتها. عمل رائع!
         </Empty>
       ) : (
@@ -78,11 +81,13 @@ export default function Review() {
               <div key={r.id} className="card" style={{ padding: 16 }}>
                 <div className="row-between wrap" style={{ gap: 8, marginBottom: 8 }}>
                   <h3 style={{ margin: 0 }}>{r.title}</h3>
-                  <span className="badge badge-pending">⏳ بانتظار الاعتماد</span>
+                  <span className="badge badge-pending"><Icon name="hourglass" /> بانتظار الاعتماد</span>
                 </div>
                 <div className="row wrap text-soft" style={{ fontSize: '0.85rem', marginBottom: 10 }}>
                   {r.category?.name && <span className="chip">{r.category.name}</span>}
-                  {r.author?.display_name && <span>👩‍🍳 {r.author.display_name}</span>}
+                  {r.author?.display_name && (
+                    <span className="row" style={{ gap: 5 }}><Icon name="chef" size={16} /> {r.author.display_name}</span>
+                  )}
                   <span>· {formatDate(r.created_at)}</span>
                 </div>
 
@@ -116,7 +121,7 @@ export default function Review() {
 
                 <div className="stack" style={{ gap: 8 }}>
                   <button className="btn btn-accent" disabled={busy} onClick={() => handleApprove(r.id)}>
-                    {busy ? '…' : '✅ اعتماد'}
+                    {busy ? '…' : <><Icon name="check" /> اعتماد</>}
                   </button>
                   <div className="row" style={{ gap: 8 }}>
                     <button
@@ -124,10 +129,10 @@ export default function Review() {
                       disabled={busy}
                       onClick={() => navigate(`/edit/${r.id}`)}
                     >
-                      ✏️ تعديل واعتماد
+                      <Icon name="edit" /> تعديل واعتماد
                     </button>
                     <button className="btn btn-danger" disabled={busy} onClick={() => handleReject(r.id)}>
-                      🚫 إلغاء
+                      <Icon name="ban" /> إلغاء
                     </button>
                   </div>
                 </div>

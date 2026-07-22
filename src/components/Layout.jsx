@@ -3,27 +3,34 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useOnline } from '../hooks/useOnline'
 import { supabase } from '../lib/supabase'
+import Icon from './Icon'
 
 function NavItem({ to, icon, label, count }) {
   return (
     <NavLink to={to} end={to === '/'}>
-      <span className="nav-icon">{icon}</span>
+      <span className="nav-icon">
+        <Icon name={icon} size={24} />
+      </span>
       <span>{label}</span>
-      {count > 0 && <span className="nav-dot">{count > 99 ? '٩٩+' : count}</span>}
+      {count > 0 && <span className="nav-dot">{count > 99 ? '99+' : count}</span>}
     </NavLink>
   )
 }
 
 export default function Layout() {
-  const { profile, isSupervisor, session } = useAuth()
+  const { isSupervisor, session } = useAuth()
   const online = useOnline()
   const location = useLocation()
   const [unread, setUnread] = useState(0)
   const [pending, setPending] = useState(0)
 
+  // إعادة التمرير لأعلى عند كل تنقّل — تنقّل أنعم
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' })
+  }, [location.pathname])
+
   const loadBadges = useCallback(async () => {
     if (!session?.user || !online) return
-    // الإشعارات غير المقروءة
     const { count: unreadCount } = await supabase
       .from('notifications')
       .select('id', { count: 'exact', head: true })
@@ -31,7 +38,6 @@ export default function Layout() {
       .eq('is_read', false)
     setUnread(unreadCount || 0)
 
-    // الوصفات قيد المراجعة (للمشرف/الأدمن فقط)
     if (isSupervisor) {
       const { count: pendingCount } = await supabase
         .from('recipes')
@@ -52,18 +58,23 @@ export default function Layout() {
 
   return (
     <>
-      {!online && <div className="offline-bar">📴 وضع دون اتصال — تصفّح الوصفات المحفوظة فقط</div>}
+      {!online && (
+        <div className="offline-bar">وضع دون اتصال — تصفّح الوصفات المحفوظة فقط</div>
+      )}
 
       <div style={{ paddingTop: online ? 0 : 28 }}>
         <Outlet context={{ reloadBadges: loadBadges }} />
+        <footer className="app-credit">
+          من تطوير وإدارة: <span className="credit-name">أسامة بن عمرو السَّروجي</span>
+        </footer>
       </div>
 
       <nav className="bottom-nav">
-        <NavItem to="/" icon="🏠" label="الرئيسية" />
-        <NavItem to="/my" icon="📖" label="وصفاتي" />
-        <NavItem to="/add" icon="➕" label="إضافة" />
-        <NavItem to="/notifications" icon="🔔" label="الإشعارات" count={unread} />
-        <NavItem to="/more" icon="☰" label="المزيد" count={isSupervisor ? pending : 0} />
+        <NavItem to="/" icon="home" label="الرئيسية" />
+        <NavItem to="/my" icon="book" label="وصفاتي" />
+        <NavItem to="/add" icon="plus" label="إضافة" />
+        <NavItem to="/notifications" icon="bell" label="الإشعارات" count={unread} />
+        <NavItem to="/more" icon="menu" label="المزيد" count={isSupervisor ? pending : 0} />
       </nav>
     </>
   )

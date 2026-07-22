@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Alert } from '../components/ui'
+import Logo from '../components/Logo'
 
 export default function FirstSetup() {
   const { isAuthenticated, needsSetup, completeFirstSetup, profile } = useAuth()
@@ -34,8 +35,8 @@ export default function FirstSetup() {
   }
 
   return (
-    <div className="center-screen" style={{ justifyContent: 'flex-start', paddingTop: '8vh' }}>
-      <div style={{ fontSize: '3rem' }}>👋</div>
+    <div className="center-screen" style={{ justifyContent: 'flex-start', paddingTop: '7vh' }}>
+      <Logo size={88} />
       <div className="text-center">
         <h1 style={{ marginBottom: 4 }}>أهلًا بك في العائلة</h1>
         <p className="text-soft">

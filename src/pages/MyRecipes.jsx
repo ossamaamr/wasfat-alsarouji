@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { fetchMyRecipes } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import { Loading, Empty, StatusBadge, Alert } from '../components/ui'
+import Icon from '../components/Icon'
 import { formatDate } from '../lib/format'
 
 export default function MyRecipes() {
@@ -34,13 +35,13 @@ export default function MyRecipes() {
   return (
     <div className="page">
       <div className="page-header">
-        <h1>📖 وصفاتي</h1>
+        <h1 className="row" style={{ gap: 8 }}><Icon name="book" size={24} /> وصفاتي</h1>
       </div>
 
       {error && <Alert type="error">{error}</Alert>}
 
       {recipes.length === 0 ? (
-        <Empty emoji="📝" title="لم تضف أي وصفة بعد">
+        <Empty icon="book" title="لم تضف أي وصفة بعد">
           ابدأ بمشاركة وصفة تحبها مع العائلة.
         </Empty>
       ) : (
@@ -68,7 +69,7 @@ export default function MyRecipes() {
       )}
 
       <button className="btn btn-primary mt-lg" onClick={() => navigate('/add')}>
-        ➕ إضافة وصفة جديدة
+        <Icon name="plus" /> إضافة وصفة جديدة
       </button>
     </div>
   )

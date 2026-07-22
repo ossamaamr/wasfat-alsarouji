@@ -32,8 +32,11 @@ export function AuthProvider({ children }) {
       return null
     }
     setProfile(data)
-    // تسجيل الجهاز للإشعارات الخارجية (أندرويد)
-    if (data.status === 'active') registerPush(data.id)
+    // تسجيل الجهاز للإشعارات الخارجية (أندرويد) — مُعطّل حتى تُضبط Firebase
+    // لتفعيله: أضِف google-services.json واضبط VITE_ENABLE_PUSH=true
+    if (data.status === 'active' && import.meta.env.VITE_ENABLE_PUSH === 'true') {
+      registerPush(data.id)
+    }
     return data
   }, [])
 
