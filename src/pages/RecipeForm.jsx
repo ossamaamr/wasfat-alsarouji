@@ -10,6 +10,7 @@ import {
 import { useAuth } from '../context/AuthContext'
 import { Alert, Loading } from '../components/ui'
 import Icon from '../components/Icon'
+import { compressImage } from '../lib/image'
 
 export default function RecipeForm() {
   const { id } = useParams()
@@ -61,8 +62,9 @@ export default function RecipeForm() {
   function onPickImage(e) {
     const file = e.target.files?.[0]
     if (!file) return
-    if (file.size > 5 * 1024 * 1024) {
-      setError('حجم الصورة كبير (الحد 5 ميجابايت). اختر صورة أصغر.')
+    // نضغط الصور الكبيرة تلقائيًا بدل رفضها؛ حدّ أمان 25 ميجابايت للملف الأصلي
+    if (file.size > 25 * 1024 * 1024) {
+      setError('حجم الصورة كبير جدًا. اختر صورة أصغر.')
       return
     }
     setError('')
@@ -81,7 +83,8 @@ export default function RecipeForm() {
     try {
       let finalImage = imageUrl
       if (imageFile) {
-        finalImage = await uploadRecipeImage(imageFile, session.user.id)
+        const compressed = await compressImage(imageFile)
+        finalImage = await uploadRecipeImage(compressed, session.user.id)
       }
 
       const payload = {

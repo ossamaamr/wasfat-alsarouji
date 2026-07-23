@@ -6,7 +6,7 @@ import { AuthProvider } from './context/AuthContext'
 import './index.css'
 
 // استعادة تفضيلات العرض (حجم الخط / الوضع الليلي)
-if (localStorage.getItem('font-large') === '1') document.body.classList.add('font-large')
+if (localStorage.getItem('font-large') === '1') document.documentElement.classList.add('font-large')
 if (localStorage.getItem('theme-dark') === '1') document.body.classList.add('theme-dark')
 
 ReactDOM.createRoot(document.getElementById('root')).render(

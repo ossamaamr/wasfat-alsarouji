@@ -116,11 +116,14 @@ export async function deleteRecipe(id) {
 
 // ── رفع الصور ──
 export async function uploadRecipeImage(file, userId) {
-  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase()
+  // بعد الضغط تصبح الصورة Blob بلا اسم — نعتمد jpg
+  const rawExt = file.name ? file.name.split('.').pop().toLowerCase().replace(/[^a-z0-9]/g, '') : ''
+  const ext = rawExt && rawExt.length <= 5 ? rawExt : 'jpg'
   const path = `${userId}/${Date.now()}.${ext}`
   const { error } = await supabase.storage.from('recipe-images').upload(path, file, {
     cacheControl: '3600',
     upsert: false,
+    contentType: file.type || 'image/jpeg',
   })
   if (error) throw error
   const { data } = supabase.storage.from('recipe-images').getPublicUrl(path)
@@ -181,13 +184,14 @@ export async function fetchUsers() {
   return data
 }
 
-// إنشاء مستخدم عبر Edge Function (تستخدم service role بأمان في الخادم)
+// إنشاء مستخدم عبر دالة قاعدة بيانات (SECURITY DEFINER) — لا تحتاج Edge Function
 export async function adminCreateUser({ loginId, role, tempPassword }) {
-  const { data, error } = await supabase.functions.invoke('admin-create-user', {
-    body: { login_id: loginId, role, temp_password: tempPassword },
+  const { data, error } = await supabase.rpc('admin_create_user', {
+    p_login_id: loginId,
+    p_role: role,
+    p_password: tempPassword,
   })
   if (error) throw error
-  if (data?.error) throw new Error(data.error)
   return data
 }
 

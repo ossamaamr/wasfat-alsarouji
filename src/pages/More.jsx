@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { RoleBadge } from '../components/ui'
+import { RoleBadge, Modal, Alert } from '../components/ui'
 import Icon from '../components/Icon'
+import { supabase } from '../lib/supabase'
 
 function MenuLink({ icon, label, onClick, note }) {
   return (
@@ -21,25 +22,87 @@ function Toggle({ icon, label, checked, onChange }) {
       <span className="row" style={{ gap: 10, fontWeight: 700 }}>
         <Icon name={icon} size={20} style={{ color: 'var(--color-text-soft)' }} /> {label}
       </span>
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-        style={{ width: 44, height: 26 }}
-      />
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} style={{ width: 44, height: 26 }} />
     </label>
+  )
+}
+
+// تعديل اسم العرض
+function EditNameModal({ current, onClose, onSaved }) {
+  const [name, setName] = useState(current || '')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  async function save() {
+    if (name.trim().length < 2) return setError('اكتب اسمًا صحيحًا.')
+    setBusy(true); setError('')
+    const { data: u } = await supabase.auth.getUser()
+    const { error: e } = await supabase.from('users').update({ display_name: name.trim() }).eq('id', u.user.id)
+    if (e) { setError(e.message); setBusy(false); return }
+    await onSaved()
+    onClose()
+  }
+  return (
+    <Modal title="تعديل الاسم" onClose={onClose}>
+      {error && <Alert type="error">{error}</Alert>}
+      <div className="field">
+        <label>الاسم كما يظهر للعائلة</label>
+        <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
+      </div>
+      <button className="btn btn-primary" disabled={busy} onClick={save}>{busy ? 'جارٍ الحفظ…' : 'حفظ'}</button>
+    </Modal>
+  )
+}
+
+// تغيير كلمة المرور
+function ChangePasswordModal({ onClose }) {
+  const [pw, setPw] = useState('')
+  const [confirm, setConfirm] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const [done, setDone] = useState(false)
+  async function save() {
+    if (pw.length < 6) return setError('كلمة المرور 6 أحرف على الأقل.')
+    if (pw !== confirm) return setError('كلمتا المرور غير متطابقتين.')
+    setBusy(true); setError('')
+    const { error: e } = await supabase.auth.updateUser({ password: pw })
+    if (e) { setError(e.message); setBusy(false); return }
+    setDone(true); setBusy(false)
+  }
+  return (
+    <Modal title="تغيير كلمة المرور" onClose={onClose}>
+      {done ? (
+        <>
+          <Alert type="success">تم تغيير كلمة المرور بنجاح.</Alert>
+          <button className="btn btn-primary" onClick={onClose}>تمّ</button>
+        </>
+      ) : (
+        <>
+          {error && <Alert type="error">{error}</Alert>}
+          <div className="field">
+            <label>كلمة المرور الجديدة</label>
+            <input className="input" type="password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="6 أحرف على الأقل" />
+          </div>
+          <div className="field">
+            <label>تأكيد كلمة المرور</label>
+            <input className="input" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+          </div>
+          <button className="btn btn-primary" disabled={busy} onClick={save}>{busy ? 'جارٍ الحفظ…' : 'حفظ'}</button>
+        </>
+      )}
+    </Modal>
   )
 }
 
 export default function More() {
   const navigate = useNavigate()
-  const { profile, isSupervisor, isAdmin, signOut } = useAuth()
+  const { profile, isSupervisor, isAdmin, signOut, refreshProfile } = useAuth()
   const [fontLarge, setFontLarge] = useState(localStorage.getItem('font-large') === '1')
   const [darkMode, setDarkMode] = useState(localStorage.getItem('theme-dark') === '1')
+  const [modal, setModal] = useState(null) // 'name' | 'password'
 
   function toggleFont(v) {
     setFontLarge(v)
-    document.body.classList.toggle('font-large', v)
+    document.documentElement.classList.toggle('font-large', v)
     localStorage.setItem('font-large', v ? '1' : '0')
   }
   function toggleDark(v) {
@@ -47,7 +110,6 @@ export default function More() {
     document.body.classList.toggle('theme-dark', v)
     localStorage.setItem('theme-dark', v ? '1' : '0')
   }
-
   async function handleLogout() {
     if (!window.confirm('هل تريد تسجيل الخروج؟')) return
     await signOut()
@@ -71,14 +133,17 @@ export default function More() {
         </div>
       </div>
 
+      <h3 className="mb">حسابي</h3>
       <div className="stack" style={{ gap: 10 }}>
-        {isSupervisor && (
-          <MenuLink icon="eye" label="مراجعة الوصفات" onClick={() => navigate('/review')} />
-        )}
+        <MenuLink icon="edit" label="تعديل الاسم" onClick={() => setModal('name')} />
+        <MenuLink icon="shield" label="تغيير كلمة المرور" onClick={() => setModal('password')} />
+      </div>
+
+      <h3 className="mt-lg mb">الأدوات</h3>
+      <div className="stack" style={{ gap: 10 }}>
+        {isSupervisor && <MenuLink icon="eye" label="مراجعة الوصفات" onClick={() => navigate('/review')} />}
         <MenuLink icon="bulb" label="إرسال اقتراح" onClick={() => navigate('/suggestions')} />
-        {isAdmin && (
-          <MenuLink icon="settings" label="لوحة الأدمن" onClick={() => navigate('/admin')} />
-        )}
+        {isAdmin && <MenuLink icon="settings" label="لوحة الأدمن" onClick={() => navigate('/admin')} />}
       </div>
 
       <h3 className="mt-lg mb">العرض</h3>
@@ -94,6 +159,11 @@ export default function More() {
       <p className="text-center text-soft mt-lg" style={{ fontSize: '0.8rem' }}>
         وصفات أسرة السَّروجيُّ · أرشيف العائلة
       </p>
+
+      {modal === 'name' && (
+        <EditNameModal current={profile?.display_name} onClose={() => setModal(null)} onSaved={refreshProfile} />
+      )}
+      {modal === 'password' && <ChangePasswordModal onClose={() => setModal(null)} />}
     </div>
   )
 }

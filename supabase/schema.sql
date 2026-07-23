@@ -277,6 +277,52 @@ begin
   return u;
 end $$;
 
+-- الأدمن: إنشاء مستخدم جديد كاملًا (حساب مصادقة + ملف) داخل قاعدة البيانات
+create or replace function public.admin_create_user(p_login_id text, p_role public.user_role, p_password text)
+returns public.users
+language plpgsql security definer set search_path = public, auth, extensions as $$
+declare
+  uid uuid;
+  clean text;
+  prof public.users;
+begin
+  if not public.is_admin() then
+    raise exception 'غير مصرّح: هذه العملية للأدمن فقط';
+  end if;
+  clean := lower(regexp_replace(coalesce(p_login_id, ''), '[^a-z0-9._-]', '', 'g'));
+  if length(clean) < 3 then raise exception 'المعرّف غير صالح (٣ أحرف/أرقام إنجليزية على الأقل)'; end if;
+  if length(coalesce(p_password, '')) < 6 then raise exception 'كلمة المرور ٦ أحرف على الأقل'; end if;
+  if exists (select 1 from auth.users where email = clean || '@sarouji.local') then
+    raise exception 'هذا المعرّف مستخدم مسبقًا';
+  end if;
+
+  uid := gen_random_uuid();
+  insert into auth.users (
+    instance_id, id, aud, role, email, encrypted_password,
+    email_confirmed_at, created_at, updated_at,
+    raw_app_meta_data, raw_user_meta_data, is_super_admin,
+    confirmation_token, recovery_token, email_change, email_change_token_new
+  ) values (
+    '00000000-0000-0000-0000-000000000000', uid, 'authenticated', 'authenticated',
+    clean || '@sarouji.local', crypt(p_password, gen_salt('bf')),
+    now(), now(), now(),
+    '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb, false,
+    '', '', '', ''
+  );
+  insert into auth.identities (
+    id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at
+  ) values (
+    gen_random_uuid(), uid,
+    jsonb_build_object('sub', uid::text, 'email', clean || '@sarouji.local'),
+    'email', uid::text, now(), now(), now()
+  );
+  insert into public.users (id, login_id, display_name, role, status)
+  values (uid, clean, null, p_role, 'pending')
+  returning * into prof;
+
+  return prof;
+end $$;
+
 -- ══════════════════════════════════════════════════════════════════════
 --  تفعيل RLS + السياسات
 -- ══════════════════════════════════════════════════════════════════════
