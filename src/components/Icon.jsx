@@ -40,9 +40,15 @@ const PATHS = {
   eye: <><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></>,
   eyeOff: <><path d="M4 4l16 16" /><path d="M9.9 5.2A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3 3.8M6 7.5A17 17 0 0 0 2 12s3.5 7 10 7a10 10 0 0 0 3-.5" /></>,
   refresh: <><path d="M20 12a8 8 0 1 1-2.3-5.6" /><path d="M20 3v4h-4" /></>,
+  heart: <><path d="M12 20s-7-4.5-9.2-8.5C1.2 8.2 3 5 6.2 5 8 5 9.3 6 12 8.5 14.7 6 16 5 17.8 5 21 5 22.8 8.2 21.2 11.5 19 15.5 12 20 12 20z" /></>,
+  palette: <><circle cx="12" cy="12" r="9" /><circle cx="8.5" cy="9" r="1.2" fill="currentColor" /><circle cx="15.5" cy="9" r="1.2" fill="currentColor" /><circle cx="9" cy="15" r="1.2" fill="currentColor" /><path d="M12 21a3 3 0 0 0 0-6c-1 0-1.5-.8-1-1.6.6-1 2-1.4 3.5-1.4 2.5 0 4.5-1 4.5-3" /></>,
+  download: <><path d="M12 4v11" /><path d="m7 11 5 5 5-5" /><path d="M5 20h14" /></>,
+  timer: <><circle cx="12" cy="13" r="8" /><path d="M12 13V9" /><path d="M9 2h6" /><path d="m18 6 1.5-1.5" /></>,
+  play: <><path d="M8 5v14l11-7z" /></>,
+  pause: <><path d="M8 5v14M16 5v14" /></>,
 }
 
-export default function Icon({ name, size = 24, strokeWidth = 1.9, className, style }) {
+export default function Icon({ name, size = 24, strokeWidth = 1.9, fill = 'none', className, style }) {
   const path = PATHS[name]
   if (!path) return null
   return (
@@ -51,7 +57,7 @@ export default function Icon({ name, size = 24, strokeWidth = 1.9, className, st
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={fill}
       stroke="currentColor"
       strokeWidth={strokeWidth}
       strokeLinecap="round"

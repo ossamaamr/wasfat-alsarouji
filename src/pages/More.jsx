@@ -98,7 +98,23 @@ export default function More() {
   const { profile, isSupervisor, isAdmin, signOut, refreshProfile } = useAuth()
   const [fontLarge, setFontLarge] = useState(localStorage.getItem('font-large') === '1')
   const [darkMode, setDarkMode] = useState(localStorage.getItem('theme-dark') === '1')
+  const [palette, setPalette] = useState(localStorage.getItem('palette') || '')
   const [modal, setModal] = useState(null) // 'name' | 'password'
+
+  const PALETTES = [
+    { id: '', name: 'طيني', color: '#8a3b2e' },
+    { id: 'olive', name: 'زيتوني', color: '#4d7c4a' },
+    { id: 'royal', name: 'ملكي', color: '#3b5a9a' },
+    { id: 'rose', name: 'وردي', color: '#b0426f' },
+    { id: 'amber', name: 'كهرماني', color: '#b3701a' },
+    { id: 'plum', name: 'أرجواني', color: '#74508f' },
+  ]
+  function pickPalette(id) {
+    PALETTES.forEach((p) => p.id && document.body.classList.remove('palette-' + p.id))
+    if (id) document.body.classList.add('palette-' + id)
+    localStorage.setItem('palette', id)
+    setPalette(id)
+  }
 
   function toggleFont(v) {
     setFontLarge(v)
@@ -150,6 +166,25 @@ export default function More() {
       <div className="stack" style={{ gap: 10 }}>
         <Toggle icon="text" label="تكبير حجم الخط" checked={fontLarge} onChange={toggleFont} />
         <Toggle icon="moon" label="الوضع الليلي" checked={darkMode} onChange={toggleDark} />
+        <div className="card" style={{ padding: '14px 18px' }}>
+          <div className="row" style={{ gap: 10, fontWeight: 700, marginBottom: 12 }}>
+            <Icon name="palette" size={20} style={{ color: 'var(--color-text-soft)' }} /> لون التطبيق
+          </div>
+          <div className="row wrap" style={{ gap: 12 }}>
+            {PALETTES.map((p) => (
+              <button
+                key={p.id || 'default'}
+                onClick={() => pickPalette(p.id)}
+                aria-label={p.name}
+                style={{
+                  width: 42, height: 42, borderRadius: '50%', background: p.color,
+                  border: palette === p.id ? '3px solid var(--color-text)' : '3px solid transparent',
+                  boxShadow: '0 0 0 1px var(--color-border)', cursor: 'pointer',
+                }}
+              />
+            ))}
+          </div>
+        </div>
       </div>
 
       <button className="btn btn-ghost mt-lg" onClick={handleLogout} style={{ color: 'var(--color-danger)' }}>

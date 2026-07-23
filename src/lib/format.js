@@ -52,3 +52,18 @@ export function toLines(text) {
     .map((l) => l.trim())
     .filter(Boolean)
 }
+
+// استخراج مدة زمنية بالدقائق من نص خطوة (للمؤقّت)
+const AR_DIGITS = { '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9' }
+export function parseMinutes(text) {
+  const t = String(text || '').replace(/[٠-٩]/g, (d) => AR_DIGITS[d])
+  if (/نصف\s*ساعة/.test(t)) return 30
+  if (/ثلث\s*ساعة/.test(t)) return 20
+  if (/ربع\s*ساعة/.test(t)) return 15
+  const hr = t.match(/(\d+)\s*(?:ساعة|ساعات)/)
+  if (hr) return parseInt(hr[1], 10) * 60
+  if (/(?:^|\s)ساعة(?:\s|$)/.test(t)) return 60
+  const mn = t.match(/(\d+)\s*(?:دقيقة|دقائق|دقايق)/)
+  if (mn) return parseInt(mn[1], 10)
+  return null
+}

@@ -69,6 +69,15 @@ export async function fetchMyRecipes(userId) {
   return data
 }
 
+export async function fetchAllRecipes() {
+  const { data, error } = await supabase
+    .from('recipes')
+    .select(RECIPE_SELECT)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data
+}
+
 export async function fetchPendingRecipes() {
   const { data, error } = await supabase
     .from('recipes')
@@ -205,4 +214,49 @@ export async function updateUserStatus(userId, status) {
   const { data, error } = await supabase.rpc('admin_set_status', { p_user_id: userId, p_status: status })
   if (error) throw error
   return data
+}
+
+// ── المفضّلة ──
+export async function fetchFavoriteIds(userId) {
+  const { data, error } = await supabase.from('favorites').select('recipe_id').eq('user_id', userId)
+  if (error) return new Set()
+  return new Set((data || []).map((r) => r.recipe_id))
+}
+
+export async function toggleFavorite(recipeId, userId, isFav) {
+  if (isFav) {
+    const { error } = await supabase.from('favorites').delete().eq('user_id', userId).eq('recipe_id', recipeId)
+    if (error) throw error
+    return false
+  }
+  const { error } = await supabase.from('favorites').insert({ user_id: userId, recipe_id: recipeId })
+  if (error) throw error
+  return true
+}
+
+// ── التعليقات ──
+export async function fetchComments(recipeId) {
+  const { data, error } = await supabase
+    .from('comments')
+    .select('*, user:users(id, display_name)')
+    .eq('recipe_id', recipeId)
+    .order('created_at', { ascending: true })
+  if (error) throw error
+  return data
+}
+
+export async function addComment(recipeId, body) {
+  const { data: userData } = await supabase.auth.getUser()
+  const { data, error } = await supabase
+    .from('comments')
+    .insert({ recipe_id: recipeId, user_id: userData.user.id, body: body.trim() })
+    .select('*, user:users(id, display_name)')
+    .single()
+  if (error) throw error
+  return data
+}
+
+export async function deleteComment(id) {
+  const { error } = await supabase.from('comments').delete().eq('id', id)
+  if (error) throw error
 }

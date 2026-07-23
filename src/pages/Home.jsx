@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { fetchApprovedRecipes, fetchCategories } from '../lib/api'
+import { fetchApprovedRecipes, fetchCategories, fetchFavoriteIds } from '../lib/api'
+import { useAuth } from '../context/AuthContext'
 import { Loading, Empty, Alert } from '../components/ui'
 import Icon from '../components/Icon'
 import Logo from '../components/Logo'
@@ -34,25 +35,30 @@ function RecipeCard({ recipe, onClick }) {
 
 export default function Home() {
   const navigate = useNavigate()
+  const { session } = useAuth()
   const [recipes, setRecipes] = useState([])
   const [categories, setCategories] = useState([])
+  const [favIds, setFavIds] = useState(new Set())
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [offline, setOffline] = useState(false)
   const [search, setSearch] = useState('')
   const [activeCat, setActiveCat] = useState(null)
+  const [showFavs, setShowFavs] = useState(false)
 
   useEffect(() => {
     let active = true
     ;(async () => {
       try {
-        const [{ data, offline: off }, cats] = await Promise.all([
+        const [{ data, offline: off }, cats, favs] = await Promise.all([
           fetchApprovedRecipes(),
           fetchCategories().catch(() => []),
+          session?.user ? fetchFavoriteIds(session.user.id).catch(() => new Set()) : new Set(),
         ])
         if (!active) return
         setRecipes(data)
         setCategories(cats)
+        setFavIds(favs)
         setOffline(off)
       } catch (err) {
         if (active) setError('تعذّر تحميل الوصفات. تحقّق من اتصالك.')
@@ -63,16 +69,17 @@ export default function Home() {
     return () => {
       active = false
     }
-  }, [])
+  }, [session])
 
   const filtered = useMemo(() => {
     const q = search.trim()
     return recipes.filter((r) => {
+      if (showFavs && !favIds.has(r.id)) return false
       if (activeCat && r.category_id !== activeCat) return false
       if (q && !r.title.includes(q) && !(r.ingredients || '').includes(q)) return false
       return true
     })
-  }, [recipes, search, activeCat])
+  }, [recipes, search, activeCat, showFavs, favIds])
 
   if (loading) return <Loading />
 
@@ -97,28 +104,40 @@ export default function Home() {
         />
       </div>
 
-      {categories.length > 0 && (
-        <div className="chips-scroll">
-          <button className={`chip ${!activeCat ? 'active' : ''}`} onClick={() => setActiveCat(null)}>
-            الكل
-          </button>
-          {categories.map((c) => (
-            <button
-              key={c.id}
-              className={`chip ${activeCat === c.id ? 'active' : ''}`}
-              onClick={() => setActiveCat(activeCat === c.id ? null : c.id)}
-            >
-              {c.name}
-            </button>
-          ))}
-        </div>
-      )}
+      <div className="chips-scroll">
+        <button
+          className={`chip ${showFavs ? 'active' : ''}`}
+          onClick={() => setShowFavs((v) => !v)}
+          style={showFavs ? { background: 'var(--color-danger)', borderColor: 'var(--color-danger)' } : undefined}
+        >
+          <Icon name="heart" size={16} fill={showFavs ? '#fff' : 'none'} /> المفضّلة
+        </button>
+        {categories.length > 0 && (
+          <>
+            <button className={`chip ${!activeCat ? 'active' : ''}`} onClick={() => setActiveCat(null)}>الكل</button>
+            {categories.map((c) => (
+              <button
+                key={c.id}
+                className={`chip ${activeCat === c.id ? 'active' : ''}`}
+                onClick={() => setActiveCat(activeCat === c.id ? null : c.id)}
+              >
+                {c.name}
+              </button>
+            ))}
+          </>
+        )}
+      </div>
 
       {filtered.length === 0 ? (
-        <Empty icon="pot" title={recipes.length === 0 ? 'لا توجد وصفات بعد' : 'لا نتائج'}>
-          {recipes.length === 0
-            ? 'كن أول من يضيف وصفة العائلة! اضغط «إضافة» بالأسفل.'
-            : 'جرّب كلمة بحث أخرى أو تصنيفًا مختلفًا.'}
+        <Empty
+          icon={showFavs ? 'heart' : 'pot'}
+          title={showFavs ? 'لا مفضّلة بعد' : recipes.length === 0 ? 'لا توجد وصفات بعد' : 'لا نتائج'}
+        >
+          {showFavs
+            ? 'اضغط ❤ داخل أي وصفة لإضافتها هنا.'
+            : recipes.length === 0
+              ? 'كن أول من يضيف وصفة العائلة! اضغط «إضافة» بالأسفل.'
+              : 'جرّب كلمة بحث أخرى أو تصنيفًا مختلفًا.'}
         </Empty>
       ) : (
         <div className="stack">

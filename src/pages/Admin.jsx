@@ -9,7 +9,9 @@ import {
   fetchCategories,
   createCategory,
   deleteCategory,
+  fetchAllRecipes,
 } from '../lib/api'
+import { exportJSON, exportCookbookHTML } from '../lib/export'
 import { useAuth } from '../context/AuthContext'
 import { Loading, Alert, Empty, RoleBadge, Modal } from '../components/ui'
 import Icon from '../components/Icon'
@@ -277,6 +279,42 @@ function CategoriesTab() {
   )
 }
 
+// ── تبويب النسخ الاحتياطي والتصدير ──
+function BackupTab() {
+  const [busy, setBusy] = useState('')
+  const [error, setError] = useState('')
+  const [msg, setMsg] = useState('')
+
+  async function run(kind) {
+    setBusy(kind); setError(''); setMsg('')
+    try {
+      const recipes = await fetchAllRecipes()
+      if (kind === 'json') { exportJSON(recipes); setMsg('تم تنزيل النسخة الاحتياطية.') }
+      else { exportCookbookHTML(recipes); setMsg('تم تنزيل الكتاب. افتحه واطبع ← «حفظ كـ PDF».') }
+    } catch (e) {
+      setError(e?.message || 'تعذّر التصدير.')
+    } finally {
+      setBusy('')
+    }
+  }
+
+  return (
+    <div>
+      {error && <Alert type="error">{error}</Alert>}
+      {msg && <Alert type="success">{msg}</Alert>}
+      <p className="text-soft">احفظ وصفات العائلة أو صدّرها ككتاب أنيق. (يُفضّل من متصفح الحاسوب.)</p>
+      <div className="stack" style={{ gap: 10 }}>
+        <button className="btn btn-primary" disabled={!!busy} onClick={() => run('book')}>
+          <Icon name="book" /> {busy === 'book' ? 'جارٍ التجهيز…' : 'تصدير كتاب عائلي (HTML/PDF)'}
+        </button>
+        <button className="btn btn-soft" disabled={!!busy} onClick={() => run('json')}>
+          <Icon name="download" /> {busy === 'json' ? 'جارٍ التجهيز…' : 'نسخة احتياطية (JSON)'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function Admin() {
   const navigate = useNavigate()
   const [tab, setTab] = useState('users')
@@ -294,11 +332,13 @@ export default function Admin() {
         <button className={`chip ${tab === 'users' ? 'active' : ''}`} onClick={() => setTab('users')}><Icon name="users" /> المستخدمون</button>
         <button className={`chip ${tab === 'suggestions' ? 'active' : ''}`} onClick={() => setTab('suggestions')}><Icon name="bulb" /> الاقتراحات</button>
         <button className={`chip ${tab === 'categories' ? 'active' : ''}`} onClick={() => setTab('categories')}><Icon name="tag" /> التصنيفات</button>
+        <button className={`chip ${tab === 'backup' ? 'active' : ''}`} onClick={() => setTab('backup')}><Icon name="download" /> نسخة احتياطية</button>
       </div>
 
       {tab === 'users' && <UsersTab />}
       {tab === 'suggestions' && <SuggestionsTab />}
       {tab === 'categories' && <CategoriesTab />}
+      {tab === 'backup' && <BackupTab />}
     </div>
   )
 }

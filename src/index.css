@@ -79,6 +79,13 @@ html.font-large {
   --fs-base: 21px;
 }
 
+/* ألوان التطبيق الاختيارية (تغيّر اللون الأساسي فقط — بساطة) */
+body.palette-olive { --color-primary: #4d7c4a; --color-primary-dark: #3c6339; --color-primary-soft: #e3efe1; }
+body.palette-royal { --color-primary: #3b5a9a; --color-primary-dark: #2e477a; --color-primary-soft: #dde5f4; }
+body.palette-rose  { --color-primary: #b0426f; --color-primary-dark: #8f3459; --color-primary-soft: #f6e0ec; }
+body.palette-amber { --color-primary: #b3701a; --color-primary-dark: #8f5813; --color-primary-soft: #f8ebd6; }
+body.palette-plum  { --color-primary: #74508f; --color-primary-dark: #5c3f73; --color-primary-soft: #ece2f4; }
+
 /* الوضع الليلي الاختياري */
 body.theme-dark {
   --color-bg: #1c1714;
