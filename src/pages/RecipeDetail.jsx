@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { fetchRecipeById, approveRecipe, rejectRecipe } from '../lib/api'
+import { fetchRecipeById, approveRecipe, rejectRecipe, deleteRecipe } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import { Loading, Empty, StatusBadge, Alert } from '../components/ui'
 import Icon from '../components/Icon'
@@ -9,12 +9,13 @@ import { formatDate, toLines } from '../lib/format'
 export default function RecipeDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { session, isSupervisor } = useAuth()
+  const { session, isSupervisor, isAdmin } = useAuth()
   const [recipe, setRecipe] = useState(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [reviewBusy, setReviewBusy] = useState(false)
   const [reviewError, setReviewError] = useState('')
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -54,6 +55,21 @@ export default function RecipeDetail() {
   const isOwner = recipe.author_id === session?.user?.id
   const canEdit = isOwner || isSupervisor
   const canReview = isSupervisor && recipe.status === 'pending'
+  // الأدمن يحذف أي وصفة؛ صاحب الوصفة يحذف وصفته غير المعتمدة
+  const canDelete = isAdmin || (isOwner && recipe.status !== 'approved')
+
+  async function handleDelete() {
+    if (!window.confirm('هل تريد حذف هذه الوصفة نهائيًا؟ لا يمكن التراجع.')) return
+    setDeleting(true)
+    setReviewError('')
+    try {
+      await deleteRecipe(recipe.id)
+      navigate('/', { replace: true })
+    } catch (err) {
+      setReviewError(err?.message || 'تعذّر حذف الوصفة.')
+      setDeleting(false)
+    }
+  }
 
   async function handleApprove() {
     setReviewBusy(true)
@@ -156,6 +172,15 @@ export default function RecipeDetail() {
         <p className="text-soft text-center mt" style={{ fontSize: '0.82rem' }}>
           آخر تعديل: {formatDate(recipe.updated_at)}
         </p>
+      )}
+
+      {canDelete && (
+        <div className="mt-lg">
+          {reviewError && !canReview && <Alert type="error">{reviewError}</Alert>}
+          <button className="btn btn-ghost" style={{ color: 'var(--color-danger)', borderColor: 'var(--color-danger-soft)' }} disabled={deleting} onClick={handleDelete}>
+            <Icon name="trash" /> {deleting ? 'جارٍ الحذف…' : 'حذف الوصفة'}
+          </button>
+        </div>
       )}
     </div>
   )
