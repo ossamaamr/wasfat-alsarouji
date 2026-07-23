@@ -5,16 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#8a3b2e" />
     <meta name="description" content="أرشيف وصفات أسرة السَّروجيُّ" />
+
+    <!-- الخط يُحمَّل دون حجب العرض؛ يظهر خط النظام فورًا ثم يُستبدل -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap"
       rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap"
+      media="print"
+      onload="this.media='all'"
     />
+
+    <style>
+      /* شاشة بدء فورية تظهر قبل تحميل التطبيق */
+      #boot {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        background: #fbf6ef;
+        font-family: 'Cairo', 'Noto Kufi Arabic', 'Segoe UI', Tahoma, sans-serif;
+      }
+      #boot .name { font-size: 1.35rem; font-weight: 800; color: #8a3b2e; }
+      #boot .sub { font-size: 0.9rem; color: #6b5d54; margin-top: -8px; }
+      #boot .bar {
+        width: 46px; height: 46px; border-radius: 50%;
+        border: 4px solid #e6dccf; border-top-color: #8a3b2e;
+        animation: bootspin 0.8s linear infinite;
+      }
+      @keyframes bootspin { to { transform: rotate(360deg); } }
+    </style>
     <title>وصفات أسرة السَّروجيُّ</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="boot">
+        <svg width="88" height="88" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="2" y="2" width="92" height="92" rx="24" fill="#7c342a" />
+          <circle cx="48" cy="48" r="37" stroke="#d4a24e" stroke-width="2.4" fill="none" />
+          <path d="M34 62C34 45 40 34 48 34S62 45 62 62Z" fill="#f4ede6" />
+          <rect x="26" y="61.5" width="44" height="9" rx="4.5" fill="#f4ede6" />
+          <circle cx="48" cy="29.5" r="3" fill="#d4a24e" />
+          <path d="M23.5 73h49" stroke="#d4a24e" stroke-width="2.2" stroke-linecap="round" />
+        </svg>
+        <div class="name">وصفات أسرة السَّروجيُّ</div>
+        <div class="sub">أرشيف العائلة</div>
+        <div class="bar"></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
