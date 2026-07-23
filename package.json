@@ -6,7 +6,7 @@
   "description": "أرشيف وصفات عائلة أبناء عمرو السروجي — تطبيق عائلي خاص",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/ci-android.mjs",
     "preview": "vite preview",
     "lint": "eslint . --ext js,jsx",
     "cap:sync": "cap sync android",
@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@capacitor/android": "^6.1.2",
+    "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^6.1.2",
     "@capacitor/core": "^6.1.2",
     "@vitejs/plugin-react": "^4.3.1",
